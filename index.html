@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 學習筆記與重點整理助手 | AI Study Notes & Revision Assistant</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HEIC 轉 JPG 支援庫 (解決 iPhone .heic 相片無法上傳與預覽問題) -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <!-- Google Fonts Inter & Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 自訂滾動條與列印樣式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Google Translate 小工具美化與頂部橫幅微調 */
+        .goog-te-gadget {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif !important;
+            font-size: 0 !important;
+            color: transparent !important;
+        }
+        .goog-te-gadget .goog-te-combo {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            font-size: 12px !important;
+            font-weight: 600;
+            color: #334155;
+            outline: none;
+            cursor: pointer;
+            margin: 0 !important;
+            transition: all 0.2s;
+        }
+        .goog-te-gadget .goog-te-combo:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .goog-logo-link, .goog-te-gadget span {
+            display: none !important;
+        }
+        body {
+            top: 0 !important;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #e2e8f0 !important;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+                        AI 學習筆記整理助手 <span class="text-xs sm:text-sm font-semibold text-slate-600">| AI Study Assistant</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-500 hidden md:block">上傳課本與講義相片，自動生成跨頁精華與自測題 · Upload notes & textbooks for instant summaries & quizzes</p>
+                </div>
+            </div>
+
+            <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+                <!-- Google Translate 介面語言切換器 -->
+                <div class="flex items-center gap-1.5 bg-slate-100/80 px-2.5 py-1 rounded-lg border border-slate-200/80" title="使用 Google 翻譯切換整個介面語言 / Change UI Language via Google Translate">
+                    <i class="fa-solid fa-language text-blue-600 text-sm"></i>
+                    <div id="google_translate_element"></div>
+                </div>
+
+                <!-- AI 引擎與金鑰設定按鈕 -->
+                <button id="apiKeyBtn" onclick="openApiKeyModal()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200/80 rounded-lg transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-robot text-blue-600"></i>
+                    <span id="apiKeyStatusText">Gemini (預設 / Default)</span>
+                    <i class="fa-solid fa-gear text-slate-400 text-[11px] ml-0.5"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- 左側控制與上傳面板 (5 欄位 / 手機全寬) -->
+        <section class="lg:col-span-5 flex flex-col gap-6 no-print">
+            
+            <!-- 圖片上傳區塊 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-camera text-blue-600"></i>
+                        <span>上傳學習相片 <span class="text-xs font-normal text-slate-500">/ Upload Photos</span></span>
+                    </h2>
+                    <span id="imageCountBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        0 張 / 0 Photos
+                    </span>
+                </div>
+
+                <!-- 拖曳/點擊上傳區域 (支援 HEIC/JPG/PNG/WEBP) -->
+                <div id="dropZone" onclick="if(event.target.tagName !== 'BUTTON' && !event.target.closest('button')) triggerFileInput(false)" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/50 hover:bg-blue-50/30 rounded-xl p-6 transition-all duration-200 text-center cursor-pointer relative group">
+                    <input type="file" id="fileInput" multiple accept="image/*,.heic,.heif" class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">點擊上傳 或 拖曳相片至此</p>
+                            <p class="text-xs font-medium text-slate-500">Click to Upload or Drag & Drop Photos Here</p>
+                            <p class="text-[11px] text-slate-400 mt-1">支援 iPhone HEIC、JPG、PNG、WEBP（自動轉檔與壓縮多張相片）<br>Supports HEIC, JPG, PNG, WEBP (Auto-convert & compress)</p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-2 mt-2">
+                            <button type="button" onclick="triggerFileInput(true)" class="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-100/80 hover:bg-blue-200 rounded-lg flex items-center gap-1 transition-colors">
+                                <i class="fa-solid fa-camera"></i> 開啟相機 / Camera
+                            </button>
+                            <button type="button" onclick="triggerFileInput(false)" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-200 hover:bg-slate-300 rounded-lg flex items-center gap-1 transition-colors">
+                                <i class="fa-solid fa-folder-open"></i> 瀏覽檔案 / Browse
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 圖片轉檔與智能壓縮進度提示 -->
+                <div id="imageProcessingNotice" class="hidden mt-3 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs font-medium text-blue-800 flex items-center gap-2">
+                    <i class="fa-solid fa-spinner animate-spin text-blue-600"></i>
+                    <span id="imageProcessingText">正在轉換與優化相片大小... / Converting & optimizing photos...</span>
+                </div>
+
+                <!-- 已上傳圖片縮圖預覽 -->
+                <div id="previewGrid" class="grid grid-cols-3 gap-2 mt-4 max-h-56 overflow-y-auto p-1 hidden">
+                    <!-- 縮圖將由 JS 動態渲染 -->
+                </div>
+            </div>
+
+            <!-- 分析設定選項區塊 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col gap-4">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-600"></i>
+                        <span>筆記處理選項 <span class="text-xs font-normal text-slate-500">/ Options</span></span>
+                    </h2>
+                    <button type="button" onclick="openApiKeyModal()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1 shrink-0">
+                        <i class="fa-solid fa-microchip"></i>
+                        <span id="panelModelBadge">切換模型 / Model</span>
+                    </button>
+                </div>
+
+                <!-- 科目選擇 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">科目類別 / Subject Category</label>
+                    <select id="subjectSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                        <option value="綜合/通用">📚 綜合 / 其他科目 (General / Other Subjects)</option>
+                        <option value="中文科">📖 中文科 (Chinese Language & Literature)</option>
+                        <option value="英文科">🔤 英文科 (English Language & Grammar)</option>
+                        <option value="數學科">📐 數學科 (Mathematics - Formulas & Steps)</option>
+                        <option value="理科/科學">🔬 理科/科學 (Science - Bio, Chem, Physics)</option>
+                        <option value="歷史科">🏛️ 歷史科 (History - Timelines & Events)</option>
+                        <option value="地理科">🌍 地理科 (Geography - Maps & Climate)</option>
+                        <option value="公民與社會/通識">⚖️ 公民與社會 / 通識 (Citizenship & Social Studies)</option>
+                    </select>
+                </div>
+
+                <!-- 輸出語言設定 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">AI 生成內容語言 / AI Output Language</label>
+                    <select id="languageSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                        <option value="繁體中文">繁體中文 (Traditional Chinese)</option>
+                        <option value="English">English (英文)</option>
+                        <option value="中英雙語對照">中英雙語對照 (Chinese-English Bilingual)</option>
+                    </select>
+                </div>
+
+                <!-- 補充說明 / 學生自訂要求 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">自訂指示與重點要求 (可選) / Custom Instructions (Optional)</label>
+                    <textarea id="customPrompt" rows="2" placeholder="例如：特別著重於公式推導、標註考試常考重點... / e.g., Focus on formula derivations, highlight exam key points..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-none"></textarea>
+                </div>
+
+                <!-- 開始分析按鈕 -->
+                <button id="generateBtn" onclick="processNotes()" class="w-full mt-2 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.99] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>開始 AI 辨識與整合重點 / Analyze & Summarize</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- 右側分析結果輸出面板 (7 欄位 / 手機全寬) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- 初始空狀態提示 -->
+            <div id="emptyState" class="bg-white rounded-2xl p-8 sm:p-12 border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center min-h-[420px]">
+                <div class="w-20 h-20 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-3xl mb-4 border border-blue-100">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">尚未上傳學習資料 <span class="block sm:inline text-sm font-semibold text-slate-500">| No Study Materials Uploaded</span></h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mt-2 mb-6 leading-relaxed">
+                    請在左側上傳或拍攝筆記、課本照片，AI 將自動為您進行文字辨識、邏輯梳理與重點提煉。<br>
+                    <span class="text-slate-400">Upload or capture photos of your notes or textbooks on the left for automatic OCR, structuring, and key takeaways.</span>
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left w-full max-w-lg text-xs text-slate-600">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-500 shrink-0"></i>
+                        <span>高精準 OCR 辨識<br><span class="text-[10px] text-slate-400">High-Precision OCR</span></span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-sitemap text-indigo-500 shrink-0"></i>
+                        <span>跨頁邏輯整合<br><span class="text-[10px] text-slate-400">Cross-Page Synthesis</span></span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-emerald-500 shrink-0"></i>
+                        <span>核心名詞與測驗<br><span class="text-[10px] text-slate-400">Key Terms & Quizzes</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 載入中狀態 (Loading) -->
+            <div id="loadingState" class="bg-white rounded-2xl p-12 border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center min-h-[420px] hidden">
+                <div class="relative w-16 h-16 mb-6">
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-blue-600">
+                        <i class="fa-solid fa-brain text-lg"></i>
+                    </div>
+                </div>
+                <h3 class="text-base font-bold text-slate-800" id="loadingStepTitle">AI 正在深度解析中... / AI is Analyzing...</h3>
+                <p class="text-xs text-slate-500 mt-2 max-w-sm" id="loadingStepDesc">正在識別多張圖片中的文字，並整合相關知識結構... / Extracting text and structuring knowledge...</p>
+            </div>
+
+            <!-- 分析結果呈現面板 -->
+            <div id="resultCard" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex-col hidden">
+                
+                <!-- 結果頂部工具列 -->
+                <div class="bg-slate-50 border-b border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 no-print">
+                    <div class="flex items-center gap-2">
+                        <span id="resSubjectBadge" class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">
+                            綜合科目 / General
+                        </span>
+                        <h3 id="resTitle" class="text-sm font-bold text-slate-800 truncate max-w-xs sm:max-w-md">
+                            學習重點摘要 / Study Summary
+                        </h3>
+                    </div>
+
+                    <!-- 操作按鈕群 -->
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="speakSummary()" title="朗讀重點摘要 / Read Summary Aloud" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-200/60 rounded-lg transition-colors text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span class="hidden md:inline">朗讀 / Read</span>
+                        </button>
+                        <button onclick="copyMarkdown()" title="複製 Markdown / Copy Markdown" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-200/60 rounded-lg transition-colors text-xs flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i>
+                            <span class="hidden sm:inline">複製 / Copy</span>
+                        </button>
+                        <button onclick="exportFile('md')" title="匯出 .MD 檔 / Export .MD" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-200/60 rounded-lg transition-colors text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                            <span class="hidden sm:inline">匯出 / Export</span>
+                        </button>
+                        <button onclick="printNotes()" title="列印或下載可列印講義 / Print or Download Handout" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-200/60 rounded-lg transition-colors text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-print"></i>
+                            <span class="hidden sm:inline">列印 / Print</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 分頁切換選單 -->
+                <div class="border-b border-slate-200 px-4 bg-white flex overflow-x-auto no-print scrollbar-none">
+                    <button onclick="switchTab('summary')" id="tab-summary" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check"></i> 核心重點 / Key Points
+                    </button>
+                    <button onclick="switchTab('terms')" id="tab-terms" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-key"></i> 關鍵名詞 / Key Terms
+                    </button>
+                    <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-cards-blank"></i> 複習抽卡 / Flashcards
+                    </button>
+                    <button onclick="switchTab('mocktest')" id="tab-mocktest" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pen text-indigo-500"></i> 模擬測驗 / Mock Exam
+                    </button>
+                    <button onclick="switchTab('outline')" id="tab-outline" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-sitemap"></i> 知識大綱 / Outline
+                    </button>
+                    <button onclick="switchTab('raw')" id="tab-raw" class="tab-btn py-3 px-3.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-align-left"></i> 原始文字 / Raw OCR
+                    </button>
+                </div>
+
+                <!-- 分頁內容展示區 -->
+                <div class="p-5 overflow-y-auto max-h-[calc(100vh-280px)]">
+                    
+                    <!-- 1. 核心重點條列 -->
+                    <div id="content-summary" class="tab-content flex flex-col gap-5">
+                        <!-- 概要短評 -->
+                        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-xs leading-relaxed text-blue-900">
+                            <span class="font-bold text-blue-700 block mb-1">💡 全篇學習總結 / Executive Summary：</span>
+                            <span id="executiveSummaryText">載入中... / Loading...</span>
+                        </div>
+                        <!-- 分類重點條列區 -->
+                        <div id="keyPointsContainer" class="space-y-4"></div>
+                    </div>
+
+                    <!-- 2. 關鍵名詞與概念 -->
+                    <div id="content-terms" class="tab-content hidden space-y-3">
+                        <div id="keyTermsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                    </div>
+
+                    <!-- 3. 互動式複習抽卡 -->
+                    <div id="content-flashcards" class="tab-content hidden space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                            <span>點擊卡片顯示/隱藏參考解答 / Click card to show or hide answer</span>
+                            <span id="quizScoreText">複習題數量 / Total Cards: 0</span>
+                        </div>
+                        <div id="flashcardsContainer" class="space-y-3"></div>
+                    </div>
+
+                    <!-- 4. 模擬測驗與 AI 自動批改 -->
+                    <div id="content-mocktest" class="tab-content hidden space-y-4">
+                        <!-- 測驗控制頂部列 -->
+                        <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-4 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <h4 class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-graduation-cap text-indigo-600"></i> AI 隨堂模擬考卷 / AI Mock Exam
+                                    </h4>
+                                    <p class="text-[11px] text-indigo-700/80 mt-0.5">每次生成皆會從筆記重點中隨機變化題型與切入角度 · Randomized questions generated from your notes</p>
+                                </div>
+                                <button id="generateExamBtn" onclick="generateMockExam()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5 transition-all">
+                                    <i class="fa-solid fa-shuffle"></i>
+                                    <span id="generateExamBtnText">生成試題 / Generate Exam</span>
+                                </button>
+                            </div>
+
+                            <!-- 自訂各題型數量控制列 -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2.5 border-t border-indigo-200/70">
+                                <div class="bg-white/90 rounded-lg p-2 border border-indigo-100">
+                                    <label for="mcqCountSelect" class="block text-[11px] font-bold text-blue-800 mb-1">選擇題 / MCQs (Max 10)</label>
+                                    <select id="mcqCountSelect" onchange="updateExamConfigSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <option value="0">0 題 / Qs</option>
+                                        <option value="1">1 題 / Q</option>
+                                        <option value="2">2 題 / Qs</option>
+                                        <option value="3" selected>3 題 / Qs</option>
+                                        <option value="4">4 題 / Qs</option>
+                                        <option value="5">5 題 / Qs</option>
+                                        <option value="6">6 題 / Qs</option>
+                                        <option value="7">7 題 / Qs</option>
+                                        <option value="8">8 題 / Qs</option>
+                                        <option value="9">9 題 / Qs</option>
+                                        <option value="10">10 題 / Qs</option>
+                                    </select>
+                                </div>
+                                <div class="bg-white/90 rounded-lg p-2 border border-indigo-100">
+                                    <label for="fillCountSelect" class="block text-[11px] font-bold text-amber-800 mb-1">填充題 / Fill-in (Max 10)</label>
+                                    <select id="fillCountSelect" onchange="updateExamConfigSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <option value="0">0 題 / Qs</option>
+                                        <option value="1">1 題 / Q</option>
+                                        <option value="2" selected>2 題 / Qs</option>
+                                        <option value="3">3 題 / Qs</option>
+                                        <option value="4">4 題 / Qs</option>
+                                        <option value="5">5 題 / Qs</option>
+                                        <option value="6">6 題 / Qs</option>
+                                        <option value="7">7 題 / Qs</option>
+                                        <option value="8">8 題 / Qs</option>
+                                        <option value="9">9 題 / Qs</option>
+                                        <option value="10">10 題 / Qs</option>
+                                    </select>
+                                </div>
+                                <div class="bg-white/90 rounded-lg p-2 border border-indigo-100">
+                                    <label for="shortCountSelect" class="block text-[11px] font-bold text-purple-800 mb-1">短答題 / Short (Max 5)</label>
+                                    <select id="shortCountSelect" onchange="updateExamConfigSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <option value="0">0 題 / Qs</option>
+                                        <option value="1">1 題 / Q</option>
+                                        <option value="2" selected>2 題 / Qs</option>
+                                        <option value="3">3 題 / Qs</option>
+                                        <option value="4">4 題 / Qs</option>
+                                        <option value="5">5 題 / Qs</option>
+                                    </select>
+                                </div>
+                                <div class="bg-white/90 rounded-lg p-2 border border-indigo-100">
+                                    <label for="longCountSelect" class="block text-[11px] font-bold text-rose-800 mb-1">長答題 / Long (Max 5)</label>
+                                    <select id="longCountSelect" onchange="updateExamConfigSummary()" class="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                        <option value="0">0 題 / Qs</option>
+                                        <option value="1" selected>1 題 / Q</option>
+                                        <option value="2">2 題 / Qs</option>
+                                        <option value="3">3 題 / Qs</option>
+                                        <option value="4">4 題 / Qs</option>
+                                        <option value="5">5 題 / Qs</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 測驗初始引導狀態 -->
+                        <div id="examEmptyState" class="py-10 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-lg">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </div>
+                            <p class="text-xs font-bold text-slate-700">準備好測試學習成果了嗎？ / Ready to test your knowledge?</p>
+                            <p id="examConfigSummaryText" class="text-[11px] text-slate-500 mt-1 mb-2 px-4 leading-relaxed">
+                                目前設定：選擇題 3 題、填充題 2 題、短答題 2 題、長答題 1 題（共 8 題），點擊上方「生成試題」即可開始<br>
+                                Current: 3 MCQs, 2 Fill-in, 2 Short, 1 Long (8 Qs total). Click "Generate Exam" above to begin.
+                            </p>
+                        </div>
+
+                        <!-- 測驗生成中狀態 -->
+                        <div id="examLoadingState" class="py-12 text-center hidden">
+                            <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3"></div>
+                            <p class="text-xs font-bold text-slate-700" id="examLoadingText">AI 老師正在為您出題中... / AI is creating your exam...</p>
+                        </div>
+
+                        <!-- 成績總結橫幅 (批改後顯示) -->
+                        <div id="examScoreBanner" class="hidden rounded-xl p-4 border shadow-sm transition-all"></div>
+
+                        <!-- 試題作答列表容器 -->
+                        <div id="examQuestionsContainer" class="space-y-4 hidden"></div>
+
+                        <!-- 提交批改按鈕區 -->
+                        <div id="examSubmitArea" class="hidden pt-2">
+                            <button id="submitExamBtn" onclick="submitAndGradeExam()" class="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-solid fa-check-double"></i>
+                                <span>提交試卷並由 AI 批改 / Submit & Grade with AI</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 5. 知識脈絡大綱 -->
+                    <div id="content-outline" class="tab-content hidden">
+                        <div class="bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap" id="outlineContainer">
+                        </div>
+                    </div>
+
+                    <!-- 6. 原始 OCR 辨識內文 -->
+                    <div id="content-raw" class="tab-content hidden">
+                        <p class="text-xs text-slate-500 mb-2">以下為 AI 從圖片中提取的原始非結構化文字 / Raw OCR text extracted from images:</p>
+                        <div id="rawOcrContainer" class="bg-slate-50 border border-slate-200 p-4 rounded-xl text-xs text-slate-700 leading-relaxed font-mono whitespace-pre-wrap max-h-96 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 列印專用排版區塊 (畫面上隱藏，列印時顯現) -->
+                <div class="hidden print-only p-8 space-y-6">
+                    <div class="border-b pb-4">
+                        <h1 id="printTitle" class="text-2xl font-bold">學習筆記整合報告 / Study Notes Report</h1>
+                        <p id="printMeta" class="text-xs text-gray-500 mt-1"></p>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold mb-2">一、核心重點整理 / Key Points</h2>
+                        <div id="printKeyPoints" class="space-y-3 text-sm"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold mb-2">二、關鍵概念與術語 / Key Concepts & Terms</h2>
+                        <div id="printKeyTerms" class="grid grid-cols-1 gap-2 text-sm"></div>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold mb-2">三、隨堂複習題 / Review Questions</h2>
+                        <div id="printQuiz" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- AI 模型與 API Key 設定彈窗 (Modal) -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 relative animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-robot text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">選擇 AI 引擎與金鑰 / AI Engine & Key</h3>
+                    <p class="text-xs text-slate-500">自由切換多模態視覺模型 / Switch multimodal vision AI models</p>
+                </div>
+            </div>
+            
+            <div class="space-y-3.5">
+                <!-- 選擇 AI 供應商 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">AI 服務供應商 / AI Service Provider</label>
+                    <select id="aiProviderSelect" onchange="onProviderChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                        <option value="gemini">Google Gemini (預設免費環境 / Default or Custom Key)</option>
+                        <option value="openai">OpenAI (ChatGPT GPT-4o 系列 / Series)</option>
+                        <option value="claude">Anthropic Claude (Claude 3.5 Sonnet / Haiku)</option>
+                        <option value="custom">自訂 OpenAI 相容 API / Custom OpenAI-Compatible API</option>
+                    </select>
+                </div>
+
+                <!-- 選擇或輸入模型名稱 -->
+                <div id="presetModelWrapper">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">選擇模型版本 / Select Model (Vision-Capable)</label>
+                    <select id="aiModelSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    </select>
+                </div>
+
+                <!-- 自訂端點設定 (僅選擇 custom 時顯示) -->
+                <div id="customEndpointWrapper" class="hidden space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">API Base URL (Chat Completions Endpoint)</label>
+                        <input type="text" id="customBaseUrlInput" placeholder="https://openrouter.ai/api/v1/chat/completions" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">自訂模型 ID / Custom Model ID (Must support Vision)</label>
+                        <input type="text" id="customModelNameInput" placeholder="e.g. google/gemini-2.0-flash-001" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    </div>
+                </div>
+
+                <!-- API Key 輸入框 -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" id="apiKeyFieldLabel">API Key 金鑰 / API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="輸入對應平台的 API Key... / Enter API Key..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                    <p id="providerHintText" class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                        選用 Google Gemini 時，若留空將自動使用系統內建預設通道。 / Leave blank for default Gemini channel.
+                    </p>
+                </div>
+
+                <p class="text-[11px] text-slate-400 border-t border-slate-100 pt-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i>所有設定與金鑰僅保存在您本機瀏覽器的 <code class="text-slate-600">localStorage</code> 中。<br>All keys are stored locally in your browser's <code class="text-slate-600">localStorage</code> only.
+                </p>
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button onclick="closeApiKeyModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">取消 / Cancel</button>
+                <button onclick="saveApiKey()" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm">儲存並套用 / Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖片放大預覽彈窗 -->
+    <div id="imageModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden no-print" onclick="closeImageModal()">
+        <img id="imageModalImg" src="" alt="Zoomed view" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain">
+    </div>
+
+    <!-- 內建列印預覽與下載講義彈窗 -->
+    <div id="printPreviewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden no-print">
+        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <!-- 彈窗頂部工具列 -->
+            <div class="bg-slate-800 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-blue-400"></i>
+                    <span class="text-xs sm:text-sm font-bold">A4 講義列印預覽 / Print Handout Preview</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="triggerSystemPrint()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> 呼叫列印 / Print
+                    </button>
+                    <button onclick="downloadPrintableHtml()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> 下載講義 / Download (.HTML)
+                    </button>
+                    <button onclick="closePrintPreviewModal()" class="p-1.5 text-slate-300 hover:text-white rounded-lg transition-colors ml-1">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 提示說明列 -->
+            <div class="bg-amber-50 border-b border-amber-200/80 px-4 py-2 text-[11px] text-amber-800 flex items-center gap-2 shrink-0">
+                <i class="fa-solid fa-circle-info text-amber-600 shrink-0"></i>
+                <span>若在網頁預覽框內按「呼叫列印」無反應，請點擊右側綠色<strong>「下載講義 (.HTML)」</strong>，用瀏覽器開啟即可列印或存成 PDF！ / If Print is blocked in preview, click <strong>Download (.HTML)</strong> to print or save as PDF.</span>
+            </div>
+            <!-- 預覽內容滾動區 -->
+            <div id="printPreviewBody" class="p-6 sm:p-8 overflow-y-auto bg-white text-slate-800 space-y-5 flex-1">
+            </div>
+        </div>
+    </div>
+
+    <!-- 訊息提示 Toast 通知 -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastContent" class="bg-slate-800 text-white text-xs font-medium py-2.5 px-4 rounded-xl shadow-lg flex items-center gap-2">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+            <span id="toastMsg">已完成操作 / Done</span>
+        </div>
+    </div>
+
+    <!-- Google Translate Widget 初始化腳本 -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'zh-TW',
+                includedLanguages: 'zh-TW,zh-CN,en,ja,ko,fr,de,es',
+                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- JavaScript 應用邏輯 -->
+    <script>
+        // ==========================================
+        // 1. 全局狀態與變數管理
+        // ==========================================
+        let uploadedImages = [];
+        let currentAnalysisData = null;
+        let currentExamQuestions = [];
+        let examAttemptCount = 0;
+
+        const AI_PROVIDER_MODELS = {
+            gemini: [
+                { id: 'gemini-3-flash-preview', label: 'Gemini 3 Flash Preview (推薦・高速 / Fast Multimodal)' },
+                { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (穩定・精準 / Balanced)' },
+                { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (深度推理 / Deep Reasoning)' }
+            ],
+            openai: [
+                { id: 'gpt-4o', label: 'GPT-4o (OpenAI 旗艦視覺 / Flagship Vision)' },
+                { id: 'gpt-4o-mini', label: 'GPT-4o Mini (快速輕量 / Fast & Light)' }
+            ],
+            claude: [
+                { id: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet (筆記整理極佳 / Best for Notes)' },
+                { id: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku (快速版 / Fast)' }
+            ]
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApiKeyStatus();
+            setupDragAndDrop();
+        });
+
+        function getAiConfig() {
+            const provider = localStorage.getItem('ai_provider') || 'gemini';
+            const model = localStorage.getItem('ai_model') || 'gemini-3-flash-preview';
+            const customBaseUrl = localStorage.getItem('ai_custom_base_url') || '';
+            const customModelName = localStorage.getItem('ai_custom_model_name') || '';
+            const apiKey = localStorage.getItem(`ai_key_${provider}`) || (provider === 'gemini' ? (localStorage.getItem('gemini_api_key') || '') : '');
+            return { provider, model, customBaseUrl, customModelName, apiKey };
+        }
+
+        function onProviderChange(savedModel = null) {
+            const provider = document.getElementById('aiProviderSelect').value;
+            const presetWrapper = document.getElementById('presetModelWrapper');
+            const customWrapper = document.getElementById('customEndpointWrapper');
+            const modelSelect = document.getElementById('aiModelSelect');
+            const hintText = document.getElementById('providerHintText');
+            const keyInput = document.getElementById('apiKeyInput');
+
+            const existingKey = localStorage.getItem(`ai_key_${provider}`) || (provider === 'gemini' ? (localStorage.getItem('gemini_api_key') || '') : '');
+            keyInput.value = existingKey;
+
+            if (provider === 'custom') {
+                presetWrapper.classList.add('hidden');
+                customWrapper.classList.remove('hidden');
+                document.getElementById('customBaseUrlInput').value = localStorage.getItem('ai_custom_base_url') || 'https://openrouter.ai/api/v1/chat/completions';
+                document.getElementById('customModelNameInput').value = localStorage.getItem('ai_custom_model_name') || '';
+                keyInput.placeholder = '輸入 API Key (Bearer Token)... / Enter API Key...';
+                hintText.textContent = '支援相容 OpenAI Chat Completions 格式的服務（如 OpenRouter、Groq 等），請確保所選模型支援圖片輸入。 / Supports OpenAI-compatible Vision endpoints.';
+            } else {
+                presetWrapper.classList.remove('hidden');
+                customWrapper.classList.add('hidden');
+
+                const models = AI_PROVIDER_MODELS[provider] || [];
+                modelSelect.innerHTML = models.map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+                if (savedModel && models.some(m => m.id === savedModel)) {
+                    modelSelect.value = savedModel;
+                }
+
+                if (provider === 'gemini') {
+                    keyInput.placeholder = '輸入 AIzaSy... (留空使用預設 / Leave blank for default)';
+                    hintText.textContent = '選用 Google Gemini 時，若留空將自動使用系統內建預設通道。 / Leave blank to use default Gemini channel.';
+                } else if (provider === 'openai') {
+                    keyInput.placeholder = '輸入 sk-proj-... 或 sk-...';
+                    hintText.textContent = '請輸入您的 OpenAI API Key。 / Please enter your OpenAI API Key.';
+                } else if (provider === 'claude') {
+                    keyInput.placeholder = '輸入 sk-ant-...';
+                    hintText.textContent = '請輸入您的 Anthropic API Key。 / Please enter your Anthropic API Key.';
+                }
+            }
+        }
+
+        function initApiKeyStatus() {
+            const config = getAiConfig();
+            const statusText = document.getElementById('apiKeyStatusText');
+            const panelBadge = document.getElementById('panelModelBadge');
+
+            const providerLabels = {
+                gemini: 'Gemini',
+                openai: 'OpenAI',
+                claude: 'Claude',
+                custom: '自訂 / Custom'
+            };
+
+            const shortModel = config.provider === 'custom'
+                ? (config.customModelName.split('/').pop() || 'Custom')
+                : config.model.replace('-preview', '').replace('-latest', '');
+
+            const displayLabel = `${providerLabels[config.provider] || 'AI'} · ${shortModel}`;
+            statusText.textContent = displayLabel;
+            if (panelBadge) {
+                panelBadge.textContent = `${displayLabel}`;
+            }
+
+            const providerSelect = document.getElementById('aiProviderSelect');
+            if (providerSelect) {
+                providerSelect.value = config.provider;
+                onProviderChange(config.model);
+            }
+        }
+
+        function openApiKeyModal() {
+            const config = getAiConfig();
+            document.getElementById('aiProviderSelect').value = config.provider;
+            onProviderChange(config.model);
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const provider = document.getElementById('aiProviderSelect').value;
+            const key = document.getElementById('apiKeyInput').value.trim();
+
+            if (provider === 'custom') {
+                const baseUrl = document.getElementById('customBaseUrlInput').value.trim();
+                const customModel = document.getElementById('customModelNameInput').value.trim();
+                if (!baseUrl || !customModel) {
+                    showToast('請填寫完整的 API Base URL 與模型名稱！ / Please fill in Base URL and Model ID!', 'error');
+                    return;
+                }
+                localStorage.setItem('ai_custom_base_url', baseUrl);
+                localStorage.setItem('ai_custom_model_name', customModel);
+            } else {
+                const model = document.getElementById('aiModelSelect').value;
+                localStorage.setItem('ai_model', model);
+                if (provider !== 'gemini' && !key) {
+                    showToast(`使用 ${provider.toUpperCase()} 必須輸入 API Key！ / API Key is required for ${provider.toUpperCase()}!`, 'error');
+                    return;
+                }
+            }
+
+            localStorage.setItem('ai_provider', provider);
+
+            if (key) {
+                localStorage.setItem(`ai_key_${provider}`, key);
+                if (provider === 'gemini') localStorage.setItem('gemini_api_key', key);
+            } else {
+                localStorage.removeItem(`ai_key_${provider}`);
+                if (provider === 'gemini') localStorage.removeItem('gemini_api_key');
+            }
+
+            initApiKeyStatus();
+            closeApiKeyModal();
+            showToast('AI 設定已更新！ / AI settings saved!', 'success');
+        }
+
+        // ==========================================
+        // 統一多模型 AI 呼叫介面
+        // ==========================================
+        async function callUnifiedAI({ systemInstruction, userPrompt, images = [], temperature = 0.2 }) {
+            const config = getAiConfig();
+
+            if (config.provider === 'gemini') {
+                const parts = [{ text: userPrompt }];
+                images.forEach(img => {
+                    parts.push({
+                        inlineData: {
+                            mimeType: img.type || 'image/jpeg',
+                            data: img.base64
+                        }
+                    });
+                });
+
+                const payload = {
+                    contents: [{ parts }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        temperature
+                    }
+                };
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`;
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error?.message || 'Gemini API 請求失敗 / Request failed');
+                }
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error('未能取得 Gemini 回覆內容 / No response content');
+                return extractJsonFromText(text);
+            }
+
+            if (config.provider === 'openai' || config.provider === 'custom') {
+                if (!config.apiKey && config.provider === 'openai') {
+                    throw new Error('請先在設定中輸入 OpenAI API Key / Please enter OpenAI API Key');
+                }
+
+                const endpoint = config.provider === 'openai'
+                    ? 'https://api.openai.com/v1/chat/completions'
+                    : config.customBaseUrl;
+                const modelName = config.provider === 'openai'
+                    ? config.model
+                    : config.customModelName;
+
+                const userContent = [{ type: 'text', text: userPrompt }];
+                images.forEach(img => {
+                    userContent.push({
+                        type: 'image_url',
+                        image_url: {
+                            url: img.dataUrl || `data:${img.type || 'image/jpeg'};base64,${img.base64}`
+                        }
+                    });
+                });
+
+                const payload = {
+                    model: modelName,
+                    messages: [
+                        { role: 'system', content: systemInstruction + '\n\n務必只輸出合法的純 JSON 物件，不要包含任何 Markdown 標記或額外說明文字。' },
+                        { role: 'user', content: userContent }
+                    ],
+                    temperature
+                };
+
+                if (config.provider === 'openai') {
+                    payload.response_format = { type: 'json_object' };
+                }
+
+                const headers = { 'Content-Type': 'application/json' };
+                if (config.apiKey) {
+                    headers['Authorization'] = `Bearer ${config.apiKey}`;
+                }
+
+                const response = await fetchWithRetry(endpoint, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error?.message || `API 請求失敗 / Request failed (${response.status})`);
+                }
+                const text = result.choices?.[0]?.message?.content;
+                if (!text) throw new Error('未能取得 AI 回覆內容 / No response content');
+                return extractJsonFromText(text);
+            }
+
+            if (config.provider === 'claude') {
+                if (!config.apiKey) {
+                    throw new Error('請先在設定中輸入 Anthropic Claude API Key / Please enter Claude API Key');
+                }
+
+                const userContent = [];
+                images.forEach(img => {
+                    userContent.push({
+                        type: 'image',
+                        source: {
+                            type: 'base64',
+                            media_type: img.type || 'image/jpeg',
+                            data: img.base64
+                        }
+                    });
+                });
+                userContent.push({
+                    type: 'text',
+                    text: userPrompt + '\n\n請直接輸出純 JSON 物件，第一個字元必須是 { ，最後一個字元必須是 } 。'
+                });
+
+                const payload = {
+                    model: config.model,
+                    max_tokens: 4096,
+                    temperature,
+                    system: systemInstruction,
+                    messages: [
+                        { role: 'user', content: userContent }
+                    ]
+                };
+
+                const response = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': config.apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error?.message || 'Claude API 請求失敗 / Request failed');
+                }
+                const text = result.content?.[0]?.text;
+                if (!text) throw new Error('未能取得 Claude 回覆內容 / No response content');
+                return extractJsonFromText(text);
+            }
+
+            throw new Error('不支援的 AI 供應商設定 / Unsupported AI provider');
+        }
+
+        function extractJsonFromText(rawText) {
+            let cleaned = rawText.trim();
+            if (cleaned.startsWith('```')) {
+                cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+            }
+            const firstBrace = cleaned.indexOf('{');
+            const lastBrace = cleaned.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+            }
+            return JSON.parse(cleaned);
+        }
+
+        // ==========================================
+        // 2. 圖片上傳與管理邏輯
+        // ==========================================
+        function triggerFileInput(useCamera = false) {
+            const input = document.getElementById('fileInput');
+            if (useCamera) {
+                input.setAttribute('capture', 'environment');
+            } else {
+                input.removeAttribute('capture');
+            }
+            input.click();
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('border-blue-500', 'bg-blue-50/50');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('border-blue-500', 'bg-blue-50/50');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }, false);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+            e.target.value = '';
+        }
+
+        function compressImageBlobToJpeg(blob, maxDim = 1400, quality = 0.82) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    URL.revokeObjectURL(url);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => {
+                    URL.revokeObjectURL(url);
+                    reject(err);
+                };
+                img.src = url;
+            });
+        }
+
+        async function handleFiles(files) {
+            if (!files || files.length === 0) return;
+
+            const noticeEl = document.getElementById('imageProcessingNotice');
+            const noticeText = document.getElementById('imageProcessingText');
+            const fileList = Array.from(files);
+
+            noticeEl.classList.remove('hidden');
+
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+                const fileNameLower = file.name.toLowerCase();
+                const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || fileNameLower.endsWith('.heic') || fileNameLower.endsWith('.heif');
+                const isImage = file.type.startsWith('image/') || isHeic;
+
+                if (!isImage) {
+                    showToast(`「${file.name}」不是圖片格式檔案 / Not a valid image file`, 'error');
+                    continue;
+                }
+
+                try {
+                    let workingBlob = file;
+
+                    if (isHeic) {
+                        noticeText.textContent = `正在轉換 iPhone 相片 (${i + 1}/${fileList.length})... / Converting HEIC photo...`;
+                        if (typeof heic2any !== 'undefined') {
+                            const converted = await heic2any({
+                                blob: file,
+                                toType: 'image/jpeg',
+                                quality: 0.85
+                            });
+                            workingBlob = Array.isArray(converted) ? converted[0] : converted;
+                        } else {
+                            throw new Error('HEIC 轉換元件載入失敗 / HEIC converter failed to load');
+                        }
+                    } else {
+                        noticeText.textContent = `正在智能壓縮相片 (${i + 1}/${fileList.length})... / Compressing photo...`;
+                    }
+
+                    const dataUrl = await compressImageBlobToJpeg(workingBlob, 1400, 0.82);
+                    const base64Data = dataUrl.split(',')[1];
+
+                    const imgObj = {
+                        id: 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        dataUrl: dataUrl,
+                        base64: base64Data,
+                        type: 'image/jpeg',
+                        name: file.name.replace(/\.(heic|heif)$/i, '.jpg')
+                    };
+
+                    uploadedImages.push(imgObj);
+                    renderPreviews();
+                } catch (err) {
+                    console.error('圖片轉檔/壓縮失敗:', err);
+                    showToast(`無法讀取「${file.name}」/ Cannot read image file`, 'error');
+                }
+            }
+
+            noticeEl.classList.add('hidden');
+        }
+
+        function removeImage(id) {
+            uploadedImages = uploadedImages.filter(img => img.id !== id);
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            const grid = document.getElementById('previewGrid');
+            const badge = document.getElementById('imageCountBadge');
+            
+            badge.textContent = `${uploadedImages.length} 張 / ${uploadedImages.length} Photos`;
+
+            if (uploadedImages.length === 0) {
+                grid.classList.add('hidden');
+                grid.innerHTML = '';
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            grid.innerHTML = uploadedImages.map((img, idx) => `
+                <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
+                    <img src="${img.dataUrl}" alt="Preview" class="w-full h-full object-cover cursor-pointer" onclick="openImageModal('${img.dataUrl}')">
+                    <span class="absolute top-1 left-1 bg-slate-900/60 text-white text-[10px] px-1.5 py-0.5 rounded-md font-mono">
+                        #${idx + 1}
+                    </span>
+                    <button onclick="removeImage('${img.id}')" class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-90 transition-opacity">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openImageModal(src) {
+            document.getElementById('imageModalImg').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        // ==========================================
+        // 3. AI 筆記分析整合邏輯
+        // ==========================================
+        async function processNotes() {
+            if (uploadedImages.length === 0) {
+                showToast('請至少上傳一張筆記相片！ / Please upload at least one photo!', 'error');
+                return;
+            }
+
+            const subject = document.getElementById('subjectSelect').value;
+            const targetLang = document.getElementById('languageSelect').value;
+            const customPrompt = document.getElementById('customPrompt').value.trim();
+
+            showLoading(true);
+
+            const systemInstruction = `你是一位專業且經驗豐富的跨學科導師與學習筆記整理專家。
+你的任務是分析學生上傳的筆記、課本或講義相片（可能包含多頁），進行文字辨識（OCR）、跨頁邏輯整合，並提煉出條理清晰的學習講義與複習抽卡。
+
+分析原則：
+1. 目標科目：${subject}。請依據此科目的特性進行深度分析（如：數學注重公式定理與解題邏輯；中文注重字詞釋義與國學；理科注重現象原理與公式；歷史注重時間脈絡因果）。
+2. 輸出語言需求：${targetLang}。所有整理內容均需符合此語言設定（若選擇「中英雙語對照」，請在每個重點、名詞解釋與題目中同時提供繁體中文與英文對照）。
+3. 自訂特別指示：${customPrompt || '無'}。
+
+請必須嚴格回傳符合以下 JSON 格式的數據結構（不要包含 Markdown 程式碼 block 標記外的非 JSON 文字）：
+{
+  "title": "單元/主題名稱",
+  "subjectDetected": "${subject}",
+  "executiveSummary": "100-200字的全篇概要總結與核心邏輯摘要",
+  "keyPoints": [
+    {
+      "category": "子主題或章節名稱",
+      "bullets": ["重點細項1", "重點細項2", "重點細項3"]
+    }
+  ],
+  "keyTerms": [
+    {
+      "term": "專有名詞/關鍵詞",
+      "definition": "精確白話解釋",
+      "exampleOrContext": "課文範例或應用補充"
+    }
+  ],
+  "mindMapOutline": "使用縮排與樹狀符號（如 ├─, └─）構成的知識脈絡結構文字",
+  "quizQuestions": [
+    {
+      "question": "針對關鍵觀念的考題/隨堂提問",
+      "answer": "精準解答",
+      "explanation": "答案補充解析"
+    }
+  ],
+  "rawOcrContent": "跨頁辨識出的所有原始連續純文字內容"
+}`;
+
+            const promptText = `請分析這 ${uploadedImages.length} 張圖片中的學習內容，並按照 JSON 格式產出完整的筆記重點與複習題。`;
+
+            try {
+                const config = getAiConfig();
+                updateLoadingText(
+                    `正在使用 ${config.provider.toUpperCase()} 辨識內文... / Analyzing with ${config.provider.toUpperCase()}...`,
+                    '進行高精準 OCR 文字提取與跨頁邏輯整合 / Performing OCR & cross-page synthesis'
+                );
+                
+                const parsedData = await callUnifiedAI({
+                    systemInstruction,
+                    userPrompt: promptText,
+                    images: uploadedImages,
+                    temperature: 0.2
+                });
+
+                currentAnalysisData = parsedData;
+
+                renderAnalysisResults(parsedData);
+                showToast('筆記重點整合成功！ / Study notes summarized successfully!', 'success');
+
+            } catch (error) {
+                console.error("AI Analysis Error:", error);
+                showToast(`處理失敗 / Failed: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 429 && retries > 0) {
+                    await new Promise(r => setTimeout(r, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                return res;
+            } catch (err) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                }
+                throw err;
+            }
+        }
+
+        // ==========================================
+        // 4. 分析結果 UI 渲染與互動
+        // ==========================================
+        function renderAnalysisResults(data) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultCard').classList.remove('hidden');
+            document.getElementById('resultCard').classList.add('flex');
+
+            document.getElementById('resSubjectBadge').textContent = data.subjectDetected || '綜合科目 / General';
+            document.getElementById('resTitle').textContent = data.title || '學習重點摘要 / Study Summary';
+            document.getElementById('executiveSummaryText').textContent = data.executiveSummary || '無總結內容 / No summary.';
+
+            // 1. 重點條列 (Key Points)
+            const kpContainer = document.getElementById('keyPointsContainer');
+            if (data.keyPoints && data.keyPoints.length > 0) {
+                kpContainer.innerHTML = data.keyPoints.map(section => `
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5 text-blue-700">
+                            <i class="fa-solid fa-bookmark text-[10px]"></i> ${escapeHtml(section.category)}
+                        </h4>
+                        <ul class="space-y-1.5 pl-2">
+                            ${(section.bullets || []).map(b => `
+                                <li class="text-xs text-slate-700 flex items-start gap-2 leading-relaxed">
+                                    <span class="text-blue-500 font-bold mt-0.5">•</span>
+                                    <span>${escapeHtml(b)}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `).join('');
+            } else {
+                kpContainer.innerHTML = '<p class="text-xs text-slate-400">未提取到特定重點 / No key points extracted.</p>';
+            }
+
+            // 2. 關鍵名詞 (Key Terms)
+            const ktContainer = document.getElementById('keyTermsContainer');
+            if (data.keyTerms && data.keyTerms.length > 0) {
+                ktContainer.innerHTML = data.keyTerms.map(term => `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 hover:border-blue-300 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-slate-900 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md">
+                                ${escapeHtml(term.term)}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed font-medium mt-1">
+                            ${escapeHtml(term.definition)}
+                        </p>
+                        ${term.exampleOrContext ? `
+                            <p class="text-[11px] text-slate-500 mt-2 bg-white p-2 rounded-lg border border-slate-100">
+                                <span class="font-semibold text-slate-600">補充/例句 / Example：</span> ${escapeHtml(term.exampleOrContext)}
+                            </p>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } else {
+                ktContainer.innerHTML = '<p class="text-xs text-slate-400">未提取到關鍵名詞 / No key terms extracted.</p>';
+            }
+
+            // 3. 隨堂抽卡 (Flashcards)
+            const fcContainer = document.getElementById('flashcardsContainer');
+            const scoreText = document.getElementById('quizScoreText');
+            if (data.quizQuestions && data.quizQuestions.length > 0) {
+                scoreText.textContent = `複習題數量 / Total Cards: ${data.quizQuestions.length}`;
+                fcContainer.innerHTML = data.quizQuestions.map((q, idx) => `
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                        <div class="p-4 bg-slate-50/50 flex items-start gap-3">
+                            <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                Q${idx + 1}
+                            </span>
+                            <div class="flex-1">
+                                <p class="text-xs font-bold text-slate-800 leading-relaxed">${escapeHtml(q.question)}</p>
+                            </div>
+                            <button onclick="toggleCardAnswer('ans_${idx}')" class="text-xs text-blue-600 font-semibold hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors border border-blue-200 shrink-0">
+                                查看答案 / Answer
+                            </button>
+                        </div>
+                        <div id="ans_${idx}" class="hidden p-4 border-t border-slate-100 bg-blue-50/30 text-xs text-slate-700 space-y-1">
+                            <p class="font-bold text-emerald-700">【參考答案 / Answer】 ${escapeHtml(q.answer)}</p>
+                            ${q.explanation ? `<p class="text-slate-500 leading-relaxed">💡 ${escapeHtml(q.explanation)}</p>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                scoreText.textContent = '複習題數量 / Total Cards: 0';
+                fcContainer.innerHTML = '<p class="text-xs text-slate-400">未生成隨堂測驗題 / No flashcards generated.</p>';
+            }
+
+            // 4. 知識脈絡 (Outline)
+            document.getElementById('outlineContainer').textContent = data.mindMapOutline || '無大綱結構 / No outline available.';
+
+            // 5. 原始 OCR
+            document.getElementById('rawOcrContainer').textContent = data.rawOcrContent || '無原始識別文字 / No raw OCR text.';
+
+            setupPrintContent(data);
+            resetExamState();
+            switchTab('summary');
+        }
+
+        function toggleCardAnswer(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabKey) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            const activeBtn = document.getElementById(`tab-${tabKey}`);
+            const activeContent = document.getElementById(`content-${tabKey}`);
+
+            if (activeBtn && activeContent) {
+                activeBtn.classList.add('border-blue-600', 'text-blue-600');
+                activeBtn.classList.remove('border-transparent', 'text-slate-500');
+                activeContent.classList.remove('hidden');
+            }
+        }
+
+        // ==========================================
+        // 5. 匯出、複製、列印與朗讀
+        // ==========================================
+        function copyMarkdown() {
+            if (!currentAnalysisData) return;
+            const md = generateMarkdownText(currentAnalysisData);
+            fallbackCopy(md);
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('已複製 Markdown 筆記！ / Markdown notes copied!', 'success');
+            } catch (err) {
+                showToast('複製失敗 / Copy failed', 'error');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function exportFile(type) {
+            if (!currentAnalysisData) return;
+            
+            let content = '';
+            let filename = `${currentAnalysisData.title || '學習筆記_StudyNotes'}.${type}`;
+            let mimeType = 'text/plain';
+
+            if (type === 'md') {
+                content = generateMarkdownText(currentAnalysisData);
+                mimeType = 'text/markdown';
+            } else {
+                content = generatePlainText(currentAnalysisData);
+            }
+
+            const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast(`已成功下載 / Downloaded: ${filename}`, 'success');
+        }
+
+        function generateMarkdownText(data) {
+            let md = `# ${data.title || '學習筆記 / Study Notes'}\n\n`;
+            md += `> **科目 / Subject**：${data.subjectDetected || '綜合科目'} | **整理時間 / Date**：${new Date().toLocaleDateString()}\n\n`;
+            md += `## 💡 全篇學習總結 / Executive Summary\n${data.executiveSummary || ''}\n\n`;
+            
+            md += `## 🎯 核心重點整理 / Key Points\n`;
+            (data.keyPoints || []).forEach(kp => {
+                md += `### ${kp.category}\n`;
+                (kp.bullets || []).forEach(b => md += `- ${b}\n`);
+                md += `\n`;
+            });
+
+            md += `## 🔑 關鍵名詞與概念 / Key Terms\n`;
+            (data.keyTerms || []).forEach(kt => {
+                md += `- **${kt.term}**：${kt.definition}\n`;
+                if (kt.exampleOrContext) md += `  - *範例 / Example*：${kt.exampleOrContext}\n`;
+            });
+            md += `\n`;
+
+            md += `## ❓ 隨堂複習與自測題目 / Review Questions\n`;
+            (data.quizQuestions || []).forEach((q, i) => {
+                md += `${i + 1}. **問 / Q**：${q.question}\n   - **答 / A**：${q.answer}\n   - **解析 / Explanation**：${q.explanation || ''}\n\n`;
+            });
+
+            md += `## 🗺️ 知識脈絡結構 / Outline\n\`\`\`text\n${data.mindMapOutline || ''}\n\`\`\`\n`;
+            return md;
+        }
+
+        function generatePlainText(data) {
+            let txt = `【${data.title || '學習筆記'}】\n科目：${data.subjectDetected || '綜合科目'}\n\n`;
+            txt += `【全篇總結】\n${data.executiveSummary || ''}\n\n`;
+            txt += `【核心重點】\n`;
+            (data.keyPoints || []).forEach(kp => {
+                txt += `[${kp.category}]\n`;
+                (kp.bullets || []).forEach(b => txt += ` • ${b}\n`);
+                txt += `\n`;
+            });
+            txt += `【關鍵概念】\n`;
+            (data.keyTerms || []).forEach(kt => {
+                txt += `${kt.term}：${kt.definition}\n`;
+            });
+            return txt;
+        }
+
+        function setupPrintContent(data) {
+            document.getElementById('printTitle').textContent = data.title || '學習筆記重點整理 / Study Notes';
+            document.getElementById('printMeta').textContent = `科目 / Subject：${data.subjectDetected || '綜合科目'} | 整理日期 / Date：${new Date().toLocaleDateString()}`;
+
+            const pkp = document.getElementById('printKeyPoints');
+            pkp.innerHTML = (data.keyPoints || []).map(kp => `
+                <div class="print-card p-3 rounded">
+                    <div class="font-bold border-b pb-1 mb-1">${escapeHtml(kp.category)}</div>
+                    <ul class="list-disc pl-4 space-y-0.5">
+                        ${(kp.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+
+            const pkt = document.getElementById('printKeyTerms');
+            pkt.innerHTML = (data.keyTerms || []).map(kt => `
+                <div class="print-card p-2 rounded">
+                    <span class="font-bold">${escapeHtml(kt.term)}</span>：${escapeHtml(kt.definition)}
+                </div>
+            `).join('');
+
+            const pq = document.getElementById('printQuiz');
+            pq.innerHTML = (data.quizQuestions || []).map((q, i) => `
+                <div class="print-card p-2.5 rounded">
+                    <div><strong>Q${i + 1}:</strong> ${escapeHtml(q.question)}</div>
+                    <div class="text-gray-600 mt-1">答 / A：${escapeHtml(q.answer)}</div>
+                </div>
+            `).join('');
+        }
+
+        function buildPrintableHtmlDocument() {
+            const title = escapeHtml(currentAnalysisData.title || '學習筆記重點整理');
+            const subject = escapeHtml(currentAnalysisData.subjectDetected || '綜合科目');
+            const dateStr = new Date().toLocaleDateString();
+            const summary = escapeHtml(currentAnalysisData.executiveSummary || '');
+
+            const keyPointsHtml = (currentAnalysisData.keyPoints || []).map(kp => `
+                <div class="card">
+                    <div class="card-title">${escapeHtml(kp.category)}</div>
+                    <ul>
+                        ${(kp.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+
+            const keyTermsHtml = (currentAnalysisData.keyTerms || []).map(kt => `
+                <div class="term-item">
+                    <strong>${escapeHtml(kt.term)}</strong>：${escapeHtml(kt.definition)}
+                    ${kt.exampleOrContext ? `<div class="term-sub">補充 / Example：${escapeHtml(kt.exampleOrContext)}</div>` : ''}
+                </div>
+            `).join('');
+
+            const quizHtml = (currentAnalysisData.quizQuestions || []).map((q, i) => `
+                <div class="card">
+                    <div><strong>Q${i + 1}：</strong>${escapeHtml(q.question)}</div>
+                    <div class="ans"><strong>參考答案 / Answer：</strong>${escapeHtml(q.answer)}</div>
+                    ${q.explanation ? `<div class="term-sub">解析 / Explanation：${escapeHtml(q.explanation)}</div>` : ''}
+                </div>
+            `).join('');
+
+            return `<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <title>${title} - 學習筆記 / Study Notes</title>
+    <style>
+        body { font-family: "Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; color: #1e293b; line-height: 1.6; padding: 24px 32px; max-width: 800px; margin: 0 auto; }
+        .header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; }
+        .header h1 { margin: 0 0 6px 0; font-size: 22px; color: #0f172a; }
+        .meta { font-size: 12px; color: #64748b; }
+        .summary-box { background: #f8fafc; border-left: 4px solid #2563eb; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; border-radius: 4px; }
+        h2 { font-size: 16px; color: #1d4ed8; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 22px; margin-bottom: 12px; }
+        .card { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; break-inside: avoid; font-size: 13px; }
+        .card-title { font-weight: bold; color: #0f172a; margin-bottom: 6px; }
+        ul { margin: 0; padding-left: 20px; }
+        li { margin-bottom: 4px; }
+        .term-item { border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; break-inside: avoid; font-size: 13px; }
+        .term-sub { font-size: 12px; color: #475569; margin-top: 4px; }
+        .ans { color: #047857; margin-top: 6px; }
+        @media print {
+            body { padding: 0; }
+            .no-print-bar { display: none !important; }
+        }
+        .no-print-bar { background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .print-btn { background: #2563eb; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="no-print-bar">
+        <span>📄 講義列印頁面 / Printable Handout (Print or Save as PDF)</span>
+        <button class="print-btn" onclick="window.print()">立即列印 / Print PDF</button>
+    </div>
+    <div class="header">
+        <h1>${title}</h1>
+        <div class="meta">科目 / Subject：${subject} ｜ 整理日期 / Date：${dateStr}</div>
+    </div>
+    <div class="summary-box"><strong>💡 全篇學習總結 / Executive Summary：</strong>${summary}</div>
+    <h2>一、核心重點整理 / Key Points</h2>
+    ${keyPointsHtml || '<p>無重點資料 / No key points</p>'}
+    <h2>二、關鍵概念與術語 / Key Terms</h2>
+    ${keyTermsHtml || '<p>無關鍵術語 / No key terms</p>'}
+    <h2>三、隨堂複習題 / Review Questions</h2>
+    ${quizHtml || '<p>無隨堂複習題 / No review questions</p>'}
+</body>
+</html>`;
+        }
+
+        function printNotes() {
+            if (!currentAnalysisData) {
+                showToast('請先生成筆記內容再列印！ / Please generate notes before printing!', 'error');
+                return;
+            }
+
+            const previewBody = document.getElementById('printPreviewBody');
+            const title = escapeHtml(currentAnalysisData.title || '學習筆記重點整理');
+            const subject = escapeHtml(currentAnalysisData.subjectDetected || '綜合科目');
+            const dateStr = new Date().toLocaleDateString();
+            const summary = escapeHtml(currentAnalysisData.executiveSummary || '');
+
+            const kpHtml = (currentAnalysisData.keyPoints || []).map(kp => `
+                <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50">
+                    <div class="font-bold text-slate-900 text-sm mb-1.5">${escapeHtml(kp.category)}</div>
+                    <ul class="list-disc pl-5 space-y-1 text-xs text-slate-700">
+                        ${(kp.bullets || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+
+            const ktHtml = (currentAnalysisData.keyTerms || []).map(kt => `
+                <div class="border border-slate-200 rounded-xl p-3 text-xs">
+                    <span class="font-bold text-slate-900">${escapeHtml(kt.term)}</span>：
+                    <span class="text-slate-700">${escapeHtml(kt.definition)}</span>
+                    ${kt.exampleOrContext ? `<div class="text-slate-500 mt-1">補充 / Example：${escapeHtml(kt.exampleOrContext)}</div>` : ''}
+                </div>
+            `).join('');
+
+            const qHtml = (currentAnalysisData.quizQuestions || []).map((q, i) => `
+                <div class="border border-slate-200 rounded-xl p-3 text-xs space-y-1">
+                    <div class="font-bold text-slate-800">Q${i + 1}：${escapeHtml(q.question)}</div>
+                    <div class="text-emerald-700 font-medium">參考答案 / Answer：${escapeHtml(q.answer)}</div>
+                    ${q.explanation ? `<div class="text-slate-500">解析 / Explanation：${escapeHtml(q.explanation)}</div>` : ''}
+                </div>
+            `).join('');
+
+            previewBody.innerHTML = `
+                <div class="border-b-2 border-blue-600 pb-3">
+                    <h1 class="text-xl font-bold text-slate-900">${title}</h1>
+                    <p class="text-xs text-slate-500 mt-1">科目 / Subject：${subject} ｜ 整理日期 / Date：${dateStr}</p>
+                </div>
+                <div class="bg-blue-50/70 border-l-4 border-blue-600 p-3.5 rounded-r-lg text-xs leading-relaxed text-slate-800">
+                    <strong class="text-blue-800">💡 全篇學習總結 / Executive Summary：</strong>${summary}
+                </div>
+                <div class="space-y-2.5">
+                    <h2 class="text-sm font-bold text-blue-700 border-b border-slate-200 pb-1">一、核心重點整理 / Key Points</h2>
+                    ${kpHtml || '<p class="text-xs text-slate-400">無重點資料 / No key points</p>'}
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-sm font-bold text-blue-700 border-b border-slate-200 pb-1">二、關鍵概念與術語 / Key Terms</h2>
+                    ${ktHtml || '<p class="text-xs text-slate-400">無關鍵術語 / No key terms</p>'}
+                </div>
+                <div class="space-y-2">
+                    <h2 class="text-sm font-bold text-blue-700 border-b border-slate-200 pb-1">三、隨堂複習題 / Review Questions</h2>
+                    ${qHtml || '<p class="text-xs text-slate-400">無隨堂複習題 / No review questions</p>'}
+                </div>
+            `;
+
+            document.getElementById('printPreviewModal').classList.remove('hidden');
+        }
+
+        function closePrintPreviewModal() {
+            document.getElementById('printPreviewModal').classList.add('hidden');
+        }
+
+        function triggerSystemPrint() {
+            try {
+                window.print();
+            } catch (e) {
+                showToast('請點選「下載講義 (.HTML)」！ / Please click Download (.HTML)!', 'error');
+            }
+        }
+
+        function downloadPrintableHtml() {
+            if (!currentAnalysisData) return;
+            const htmlContent = buildPrintableHtmlDocument();
+            const filename = `${currentAnalysisData.title || '學習筆記'}_講義_Handout.html`;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`已下載 / Downloaded: ${filename}`, 'success');
+        }
+
+        function speakSummary() {
+            if (!currentAnalysisData || !currentAnalysisData.executiveSummary) return;
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(currentAnalysisData.executiveSummary);
+                const targetLang = document.getElementById('languageSelect').value;
+                utterance.lang = targetLang === 'English' ? 'en-US' : 'zh-HK';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+                showToast('開始朗讀總結摘要... / Reading summary aloud...', 'info');
+            } else {
+                showToast('您的瀏覽器不支援語音朗讀功能 / Text-to-speech not supported', 'error');
+            }
+        }
+
+        // ==========================================
+        // 6. 介面輔助 UI 函式
+        // ==========================================
+        function showLoading(isLoading) {
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+            const resultCard = document.getElementById('resultCard');
+            const generateBtn = document.getElementById('generateBtn');
+
+            if (isLoading) {
+                emptyState.classList.add('hidden');
+                resultCard.classList.add('hidden');
+                resultCard.classList.remove('flex');
+                loadingState.classList.remove('hidden');
+                generateBtn.disabled = true;
+            } else {
+                loadingState.classList.add('hidden');
+                generateBtn.disabled = false;
+            }
+        }
+
+        function updateLoadingText(title, desc) {
+            document.getElementById('loadingStepTitle').textContent = title;
+            document.getElementById('loadingStepDesc').textContent = desc;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+            } else if (type === 'error') {
+                toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-info text-blue-400';
+            }
+
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+            }, 3200);
+        }
+
+        // ==========================================
+        // 7. 模擬測驗出題與 AI 智能批改邏輯
+        // ==========================================
+        function getExamCounts() {
+            const mcqCount = Math.min(10, Math.max(0, parseInt(document.getElementById('mcqCountSelect')?.value || '3', 10)));
+            const fillCount = Math.min(10, Math.max(0, parseInt(document.getElementById('fillCountSelect')?.value || '2', 10)));
+            const shortCount = Math.min(5, Math.max(0, parseInt(document.getElementById('shortCountSelect')?.value || '2', 10)));
+            const longCount = Math.min(5, Math.max(0, parseInt(document.getElementById('longCountSelect')?.value || '1', 10)));
+            return {
+                mcqCount,
+                fillCount,
+                shortCount,
+                longCount,
+                totalCount: mcqCount + fillCount + shortCount + longCount
+            };
+        }
+
+        function updateExamConfigSummary() {
+            const { mcqCount, fillCount, shortCount, longCount, totalCount } = getExamCounts();
+            const summaryEl = document.getElementById('examConfigSummaryText');
+            if (!summaryEl) return;
+            if (totalCount === 0) {
+                summaryEl.innerHTML = '請至少選擇 1 題題目才能生成試卷！<br>Please select at least 1 question to generate an exam.';
+            } else {
+                summaryEl.innerHTML = `目前設定：選擇題 ${mcqCount} 題、填充題 ${fillCount} 題、短答題 ${shortCount} 題、長答題 ${longCount} 題（共 ${totalCount} 題），點擊上方「生成試題」即可開始<br>Current: ${mcqCount} MCQs, ${fillCount} Fill-in, ${shortCount} Short, ${longCount} Long (${totalCount} Qs total). Click "Generate Exam" above to begin.`;
+            }
+        }
+
+        function getQuestionMaxScore(type) {
+            if (type === 'mcq' || type === 'fill_in_blank') return 10;
+            if (type === 'short_answer') return 20;
+            if (type === 'long_answer') return 30;
+            return 10;
+        }
+
+        function resetExamState() {
+            currentExamQuestions = [];
+            examAttemptCount = 0;
+            document.getElementById('examEmptyState').classList.remove('hidden');
+            document.getElementById('examLoadingState').classList.add('hidden');
+            document.getElementById('examQuestionsContainer').classList.add('hidden');
+            document.getElementById('examQuestionsContainer').innerHTML = '';
+            document.getElementById('examSubmitArea').classList.add('hidden');
+            document.getElementById('examScoreBanner').classList.add('hidden');
+            document.getElementById('generateExamBtnText').textContent = '生成試題 / Generate Exam';
+            updateExamConfigSummary();
+        }
+
+        async function generateMockExam() {
+            if (!currentAnalysisData) {
+                showToast('請先上傳筆記並完成重點分析！ / Please analyze your notes first!', 'error');
+                return;
+            }
+
+            const { mcqCount, fillCount, shortCount, longCount, totalCount } = getExamCounts();
+            if (totalCount === 0) {
+                showToast('請至少設定 1 題題目再生成試卷！ / Select at least 1 question!', 'error');
+                return;
+            }
+
+            examAttemptCount++;
+            const targetLang = document.getElementById('languageSelect').value;
+            const subject = currentAnalysisData.subjectDetected || document.getElementById('subjectSelect').value;
+            const randomSeed = Math.floor(Math.random() * 100000);
+
+            document.getElementById('examEmptyState').classList.add('hidden');
+            document.getElementById('examQuestionsContainer').classList.add('hidden');
+            document.getElementById('examSubmitArea').classList.add('hidden');
+            document.getElementById('examScoreBanner').classList.add('hidden');
+            document.getElementById('examLoadingText').textContent = `AI 老師正在編制第 ${examAttemptCount} 份試題（共 ${totalCount} 題）... / Generating Exam #${examAttemptCount} (${totalCount} Qs)...`;
+            document.getElementById('examLoadingState').classList.remove('hidden');
+            document.getElementById('generateExamBtn').disabled = true;
+
+            const typeInstructions = [];
+            if (mcqCount > 0) {
+                typeInstructions.push(`- ${mcqCount} 題「選擇題」(type: "mcq")：每題包含 4 個選項 (options 陣列) 與正確答案索引 (correctOptionIndex: 0 到 3)`);
+            }
+            if (fillCount > 0) {
+                typeInstructions.push(`- ${fillCount} 題「填充題」(type: "fill_in_blank")：在句子中用「______」表示待填寫的專有名詞或關鍵概念（不供詞，referenceAnswer 為精準標準答案詞語）`);
+            }
+            if (shortCount > 0) {
+                typeInstructions.push(`- ${shortCount} 題「短答題」(type: "short_answer")：測試核心定義、原因或簡短步驟（約 2-3 句即可完整作答，referenceAnswer 列出評分重點）`);
+            }
+            if (longCount > 0) {
+                typeInstructions.push(`- ${longCount} 題「長答題」(type: "long_answer")：具深度與綜合性的申論、比較、因果分析或完整公式推導應用題（需要多角度或分點詳述，referenceAnswer 列出完整的分點評分標準）`);
+            }
+
+            const systemInstruction = `你是一位專業的${subject}出題老師。請根據提供的學習筆記整合內容，為中學或大學程度的學生設計一份高質素的模擬測驗卷。
+每次出題都必須【變換不同的切入角度、情境或細節】，絕對不能與之前的題目重複（隨機種子碼: ${randomSeed}，第 ${examAttemptCount} 次出題）。
+輸出語言：${targetLang}。
+
+請嚴格按照以下題數分配生成共 ${totalCount} 題（若某題型為 0 題則切勿生成）：
+${typeInstructions.join('\n')}
+
+請嚴格回傳以下 JSON 格式（questions 陣列長度必須剛好等於 ${totalCount}，不要包含 Markdown 標記外的文字）：
+{
+  "questions": [
+    {
+      "id": 1,
+      "type": "mcq",
+      "question": "單選題題目內容",
+      "options": ["選項A內容", "選項B內容", "選項C內容", "選項D內容"],
+      "correctOptionIndex": 0,
+      "explanation": "為何此選項正確及概念解析"
+    },
+    {
+      "id": 2,
+      "type": "fill_in_blank",
+      "question": "請在橫線上填寫正確的專有名詞或關鍵字：...... ______ ......",
+      "referenceAnswer": "標準關鍵詞答案",
+      "explanation": "相關概念補充解析"
+    },
+    {
+      "id": 3,
+      "type": "short_answer",
+      "question": "短答題題目內容",
+      "referenceAnswer": "標準參考答案與評分關鍵點"
+    },
+    {
+      "id": 4,
+      "type": "long_answer",
+      "question": "長答題題目內容（需分點論述或深入分析）",
+      "referenceAnswer": "完整長答題評分標準（分點列出得分要點）"
+    }
+  ]
+}`;
+
+            const notesContext = JSON.stringify({
+                title: currentAnalysisData.title,
+                summary: currentAnalysisData.executiveSummary,
+                keyPoints: currentAnalysisData.keyPoints,
+                keyTerms: currentAnalysisData.keyTerms,
+                rawText: (currentAnalysisData.rawOcrContent || '').slice(0, 3500)
+            });
+
+            try {
+                const parsed = await callUnifiedAI({
+                    systemInstruction,
+                    userPrompt: `請根據以下筆記內容生成一份全新的 ${totalCount} 題模擬試卷（選擇題 ${mcqCount} 題、填充題 ${fillCount} 題、短答題 ${shortCount} 題、長答題 ${longCount} 題）：\n${notesContext}`,
+                    images: [],
+                    temperature: 0.85
+                });
+
+                currentExamQuestions = parsed.questions || [];
+
+                renderMockExam(currentExamQuestions);
+                document.getElementById('generateExamBtnText').textContent = '換批新題 / Regenerate';
+                showToast(`模擬試題（共 ${currentExamQuestions.length} 題）已生成！ / Exam generated (${currentExamQuestions.length} Qs)!`, 'success');
+
+            } catch (error) {
+                console.error('Exam Generation Error:', error);
+                showToast(`生成試題失敗 / Failed: ${error.message}`, 'error');
+                document.getElementById('examEmptyState').classList.remove('hidden');
+            } finally {
+                document.getElementById('examLoadingState').classList.add('hidden');
+                document.getElementById('generateExamBtn').disabled = false;
+            }
+        }
+
+        function renderMockExam(questions) {
+            const container = document.getElementById('examQuestionsContainer');
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            container.innerHTML = questions.map((q, idx) => {
+                const maxPts = getQuestionMaxScore(q.type);
+                let badgeHtml = '';
+                let bodyHtml = '';
+
+                if (q.type === 'mcq') {
+                    badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold shrink-0 mt-0.5 bg-blue-100 text-blue-700">選擇題 / MCQ #${idx + 1} (${maxPts} pts)</span>`;
+                    bodyHtml = `
+                        <div class="space-y-2 pl-1">
+                            ${(q.options || []).map((opt, optIdx) => `
+                                <label id="exam_opt_label_${idx}_${optIdx}" class="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors text-xs text-slate-700">
+                                    <input type="radio" name="exam_q_${idx}" value="${optIdx}" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="font-bold text-slate-500">${optionLabels[optIdx]}.</span>
+                                    <span class="flex-1">${escapeHtml(opt)}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (q.type === 'fill_in_blank') {
+                    badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold shrink-0 mt-0.5 bg-amber-100 text-amber-800">填充題 / Fill-in #${idx + 1} (${maxPts} pts)</span>`;
+                    bodyHtml = `
+                        <div class="pl-1">
+                            <div class="flex items-center gap-2 bg-amber-50/40 border border-amber-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white transition-all">
+                                <span class="text-[11px] font-bold text-amber-700 shrink-0">答案 / Answer：</span>
+                                <input type="text" id="exam_fill_ans_${idx}" placeholder="請輸入橫線上的專有名詞或關鍵字... / Enter keyword..." class="w-full bg-transparent text-xs font-medium text-slate-800 focus:outline-none border-b border-dashed border-amber-400 pb-0.5">
+                            </div>
+                        </div>
+                    `;
+                } else if (q.type === 'long_answer') {
+                    badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold shrink-0 mt-0.5 bg-rose-100 text-rose-700">長答題 / Long #${idx + 1} (${maxPts} pts)</span>`;
+                    bodyHtml = `
+                        <div class="pl-1">
+                            <textarea id="exam_long_ans_${idx}" rows="6" placeholder="本題為長答題（滿分 ${maxPts} 分），建議分點詳細論述... / Long answer (${maxPts} pts max). Elaborate in detail with bullet points..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all resize-y"></textarea>
+                        </div>
+                    `;
+                } else {
+                    badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold shrink-0 mt-0.5 bg-purple-100 text-purple-700">短答題 / Short #${idx + 1} (${maxPts} pts)</span>`;
+                    bodyHtml = `
+                        <div class="pl-1">
+                            <textarea id="exam_short_ans_${idx}" rows="3" placeholder="請簡潔扼要地輸入你的作答內容... / Enter a concise short answer..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all resize-none"></textarea>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div id="exam_q_card_${idx}" class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm transition-all">
+                        <div class="flex items-start gap-2.5 mb-3">
+                            ${badgeHtml}
+                            <p class="text-xs font-bold text-slate-800 leading-relaxed">${escapeHtml(q.question)}</p>
+                        </div>
+                        ${bodyHtml}
+                        <!-- 批改結果回饋區 -->
+                        <div id="exam_feedback_${idx}" class="hidden mt-3 pt-3 border-t border-slate-100 text-xs space-y-1.5"></div>
+                    </div>
+                `;
+            }).join('');
+
+            container.classList.remove('hidden');
+            document.getElementById('examSubmitArea').classList.remove('hidden');
+            document.getElementById('submitExamBtn').disabled = false;
+            document.getElementById('submitExamBtn').innerHTML = '<i class="fa-solid fa-check-double"></i><span>提交試卷並由 AI 批改 / Submit & Grade with AI</span>';
+        }
+
+        async function submitAndGradeExam() {
+            if (!currentExamQuestions || currentExamQuestions.length === 0) return;
+
+            const userSubmissions = [];
+            let unansweredCount = 0;
+
+            currentExamQuestions.forEach((q, idx) => {
+                if (q.type === 'mcq') {
+                    const selected = document.querySelector(`input[name="exam_q_${idx}"]:checked`);
+                    const val = selected ? parseInt(selected.value, 10) : null;
+                    if (val === null) unansweredCount++;
+                    userSubmissions.push({ index: idx, type: 'mcq', userAnswerIndex: val });
+                } else if (q.type === 'fill_in_blank') {
+                    const fillVal = (document.getElementById(`exam_fill_ans_${idx}`)?.value || '').trim();
+                    if (!fillVal) unansweredCount++;
+                    userSubmissions.push({ index: idx, type: 'fill_in_blank', userText: fillVal });
+                } else if (q.type === 'long_answer') {
+                    const longVal = (document.getElementById(`exam_long_ans_${idx}`)?.value || '').trim();
+                    if (!longVal) unansweredCount++;
+                    userSubmissions.push({ index: idx, type: 'long_answer', userText: longVal });
+                } else {
+                    const textVal = (document.getElementById(`exam_short_ans_${idx}`)?.value || '').trim();
+                    if (!textVal) unansweredCount++;
+                    userSubmissions.push({ index: idx, type: 'short_answer', userText: textVal });
+                }
+            });
+
+            if (unansweredCount > 0) {
+                showToast(`還有 ${unansweredCount} 題未作答！ / ${unansweredCount} question(s) unanswered!`, 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitExamBtn');
+            const generateBtn = document.getElementById('generateExamBtn');
+            submitBtn.disabled = true;
+            generateBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i><span>AI 正在批改試卷中... / AI is grading your exam...</span>';
+
+            const subjectiveItems = currentExamQuestions
+                .map((q, idx) => ({
+                    questionIndex: idx,
+                    questionType: q.type,
+                    maxScore: getQuestionMaxScore(q.type),
+                    question: q.question,
+                    referenceAnswer: q.referenceAnswer,
+                    studentAnswer: userSubmissions[idx].userText
+                }))
+                .filter((_, idx) => currentExamQuestions[idx].type !== 'mcq');
+
+            let aiGradesMap = {};
+
+            try {
+                if (subjectiveItems.length > 0) {
+                    const targetLang = document.getElementById('languageSelect').value;
+                    const gradePrompt = `你是一位專業、公正且具鼓勵性的閱卷老師。請根據「參考答案」批改學生的作答。
+輸出語言：${targetLang}。
+
+評分規則（請嚴格遵守每題的 maxScore 滿分上限）：
+1. **填充題 (fill_in_blank, maxScore: 10)**：若學生填寫的詞語與參考答案一致或為意思精確相符的同義詞，給 10 分；若部分接近給 5 分；錯誤給 0 分。
+2. **短答題 (short_answer, maxScore: 20)**：根據關鍵概念覆蓋程度給予 0 至 20 分，並指出答對或遺漏處。
+3. **長答題 (long_answer, maxScore: 30)**：根據論點完整性、邏輯深度、舉例說明或推導步驟給予 0 至 30 分，並提供結構化的分點批改評語與改進建議。
+
+請嚴格回傳 JSON 格式：
+{
+  "grades": [
+    {
+      "questionIndex": 3,
+      "score": 18,
+      "comment": "批改評語與改進建議"
+    }
+  ]
+}
+
+待批改題目與學生作答：
+${JSON.stringify(subjectiveItems)}`;
+
+                    const parsedGrades = await callUnifiedAI({
+                        systemInstruction: '你是一位專業且公正的閱卷老師，請嚴格以 JSON 格式回傳評分結果。',
+                        userPrompt: gradePrompt,
+                        images: [],
+                        temperature: 0.2
+                    });
+
+                    (parsedGrades.grades || []).forEach(g => {
+                        aiGradesMap[g.questionIndex] = g;
+                    });
+                }
+
+                let totalScore = 0;
+                let maxScore = 0;
+                const optionLabels = ['A', 'B', 'C', 'D'];
+
+                currentExamQuestions.forEach((q, idx) => {
+                    const qMax = getQuestionMaxScore(q.type);
+                    maxScore += qMax;
+                    const feedbackEl = document.getElementById(`exam_feedback_${idx}`);
+                    const cardEl = document.getElementById(`exam_q_card_${idx}`);
+                    feedbackEl.classList.remove('hidden');
+
+                    if (q.type === 'mcq') {
+                        document.querySelectorAll(`input[name="exam_q_${idx}"]`).forEach(inp => inp.disabled = true);
+
+                        const userChoice = userSubmissions[idx].userAnswerIndex;
+                        const isCorrect = userChoice === q.correctOptionIndex;
+                        if (isCorrect) totalScore += qMax;
+
+                        const correctLabel = document.getElementById(`exam_opt_label_${idx}_${q.correctOptionIndex}`);
+                        if (correctLabel) {
+                            correctLabel.classList.add('bg-emerald-50', 'border-emerald-400', 'text-emerald-900', 'font-medium');
+                        }
+                        if (!isCorrect) {
+                            const wrongLabel = document.getElementById(`exam_opt_label_${idx}_${userChoice}`);
+                            if (wrongLabel) {
+                                wrongLabel.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900');
+                            }
+                            cardEl.classList.add('border-rose-200');
+                        } else {
+                            cardEl.classList.add('border-emerald-200');
+                        }
+
+                        feedbackEl.innerHTML = `
+                            <div class="flex items-center justify-between font-bold ${isCorrect ? 'text-emerald-700' : 'text-rose-600'}">
+                                <span>${isCorrect ? `✅ 回答正確 / Correct! (+${qMax} pts)` : `❌ 回答錯誤 / Incorrect (你的選擇 / Yours: ${optionLabels[userChoice]}，正確 / Correct: ${optionLabels[q.correctOptionIndex]})`}</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                <span class="font-bold text-slate-700">💡 解析 / Explanation：</span>${escapeHtml(q.explanation || '')}
+                            </p>
+                        `;
+                    } else if (q.type === 'fill_in_blank') {
+                        const inputEl = document.getElementById(`exam_fill_ans_${idx}`);
+                        if (inputEl) inputEl.disabled = true;
+
+                        const gradeInfo = aiGradesMap[idx] || { score: 0, comment: '已完成批改 / Graded.' };
+                        const score = Math.min(qMax, Math.max(0, Number(gradeInfo.score) || 0));
+                        totalScore += score;
+                        const isFull = score >= qMax;
+
+                        cardEl.classList.add(isFull ? 'border-emerald-200' : (score > 0 ? 'border-amber-200' : 'border-rose-200'));
+
+                        feedbackEl.innerHTML = `
+                            <div class="flex items-center justify-between font-bold ${isFull ? 'text-emerald-700' : (score > 0 ? 'text-amber-700' : 'text-rose-600')}">
+                                <span>${isFull ? `✅ 填充正確 / Correct! (+${score} / ${qMax} pts)` : `📝 得分 / Score：${score} / ${qMax} pts`}</span>
+                            </div>
+                            <div class="bg-amber-50/50 p-2.5 rounded-lg border border-amber-100 text-slate-700 space-y-1">
+                                <p><span class="font-bold text-emerald-700">📖 標準答案 / Standard Answer：</span><span class="font-bold text-slate-900">${escapeHtml(q.referenceAnswer || '')}</span></p>
+                                <p><span class="font-bold text-slate-700">👨‍🏫 評語 / Feedback：</span>${escapeHtml(gradeInfo.comment)}</p>
+                            </div>
+                        `;
+                    } else {
+                        const isLong = q.type === 'long_answer';
+                        const textarea = document.getElementById(isLong ? `exam_long_ans_${idx}` : `exam_short_ans_${idx}`);
+                        if (textarea) textarea.disabled = true;
+
+                        const gradeInfo = aiGradesMap[idx] || { score: 0, comment: '已完成批改 / Graded.' };
+                        const score = Math.min(qMax, Math.max(0, Number(gradeInfo.score) || 0));
+                        totalScore += score;
+
+                        const isGood = score >= Math.round(qMax * 0.7);
+                        cardEl.classList.add(isGood ? 'border-emerald-200' : 'border-amber-200');
+
+                        feedbackEl.innerHTML = `
+                            <div class="flex items-center justify-between font-bold ${isGood ? 'text-emerald-700' : 'text-amber-700'}">
+                                <span>📝 ${isLong ? '長答題 / Long Answer' : '短答題 / Short Answer'} 得分 / Score：${score} / ${qMax} pts</span>
+                            </div>
+                            <div class="bg-indigo-50/60 p-2.5 rounded-lg border border-indigo-100 text-slate-700 space-y-1.5">
+                                <p class="leading-relaxed"><span class="font-bold text-indigo-800">👨‍🏫 老師評語 / Feedback：</span>${escapeHtml(gradeInfo.comment)}</p>
+                                <p class="text-slate-600 pt-1.5 border-t border-indigo-100/80 whitespace-pre-line leading-relaxed"><span class="font-bold text-slate-700">📖 參考答案 / Marking Scheme：</span>${escapeHtml(q.referenceAnswer || '')}</p>
+                            </div>
+                        `;
+                    }
+                });
+
+                const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+                const banner = document.getElementById('examScoreBanner');
+                let badgeColor = 'bg-emerald-50 border-emerald-200 text-emerald-900';
+                let praise = '太棒了！你已經完全掌握這份筆記的核心重點！ / Excellent! You have mastered the key concepts!';
+                if (percentage < 60) {
+                    badgeColor = 'bg-rose-50 border-rose-200 text-rose-900';
+                    praise = '加油！建議再重溫核心重點，然後按「換批新題」再挑戰一次！ / Keep going! Review the key points and try again!';
+                } else if (percentage < 85) {
+                    badgeColor = 'bg-amber-50 border-amber-200 text-amber-900';
+                    praise = '表現不錯！留意錯題解析，點擊「換批新題」繼續鞏固記憶！ / Good job! Check the explanations and practice more!';
+                }
+
+                banner.className = `rounded-xl p-4 border shadow-sm transition-all ${badgeColor}`;
+                banner.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-xs font-bold opacity-80">模擬測驗總成績 / Total Exam Score</div>
+                            <div class="text-2xl font-extrabold mt-0.5">${totalScore} <span class="text-sm font-medium opacity-75">/ ${maxScore} 分 (${percentage}%)</span></div>
+                        </div>
+                        <button onclick="generateMockExam()" class="px-3 py-2 bg-white/90 hover:bg-white text-slate-800 text-xs font-bold rounded-lg shadow-sm border border-slate-200/80 transition-all">
+                            <i class="fa-solid fa-rotate-right mr-1 text-indigo-600"></i> 再測一次 / Retry New Exam
+                        </button>
+                    </div>
+                    <p class="text-xs mt-2 font-medium leading-relaxed">${praise}</p>
+                `;
+                banner.classList.remove('hidden');
+                document.getElementById('examSubmitArea').classList.add('hidden');
+                showToast(`批改完成！總分 / Score: ${totalScore} / ${maxScore}`, 'success');
+
+            } catch (error) {
+                console.error('Grading Error:', error);
+                showToast(`批改錯誤 / Grading Error: ${error.message}`, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-check-double"></i><span>重新提交批改 / Resubmit for Grading</span>';
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
